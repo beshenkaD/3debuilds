@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=2020.1.1
+Name=Quixel Bridge
+Comment=Quixel bridge
+Path=/usr/bin/
+Exec=Bridge.AppImage
+Icon=quixel-bridge-icon
+Terminal=false
+Categories=Graphics;
