@@ -1,0 +1,211 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:             sesinetd
+# Required-Start:       $local_fs $network
+# Required-Stop:
+# Should-Start:
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    Script to start and stop the Houdini License Manager
+# Description:
+### END INIT INFO
+
+# Start/Stop Houdini License Manager
+#
+# Linux:
+#   This script goes in the appropriate init.d directory with symlinks
+#   called S89sesinetd in /etc/rc[2345].d and K89sesinetd in /etc/rc[S016].d
+
+SESI=/usr/lib/sesi			# Directory where sesinetd is installed
+SESINETD=${SESI}/sesinetd		# Name of sesinetd executable to run
+SESICTRL=${SESI}/sesictrl		# Name of sesictrl executable to run
+SESINETD_START=${SESI}/sesinetd_safe	# Script to start sesinetd
+
+# Location of options files, leave empty to automatically determine this.
+# Default: ${SESI}/sesinetd.options
+OPTIONS_FILE=
+
+# Additional options specified on top of those specified in $OPTIONS_FILE
+OPTIONS_EXTRA=
+
+# Name of log file, leave empty to automatically this.
+# Default: /var/log/sesinetd.log
+LOG_FILE=
+
+# Location of directory to store pid file
+# This is used to determine if sesinetd has already started, and if so, its
+# process id. Leave this empty to be automatically determine this.
+# Default: /var/run if it exists, otherwise to $SESI
+PID_DIR=
+
+HOST=`hostname -s`
+DEBUG=0					# Set to 1 to debug this script
+
+# Load LSB init functions
+if [ -f /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+fi
+
+pidofsesinetd() {
+    pid=`ps -C "sesinetd" -o pid,command | grep -v '/bin/sh' | tail -1 | awk '{print $1}'`
+    if [ "$pid" != "PID" ]; then
+	echo $pid
+	return 0
+    else
+	return 1
+    fi
+}
+
+# Provide our own versions if not defined already
+if ! type log_daemon_msg > /dev/null 2>&1; then
+    log_daemon_msg() {
+        echo -n $1
+    }
+fi
+
+if ! type log_end_msg > /dev/null 2>&1; then
+    log_end_msg() {
+        if [ "$1" = "0" ]; then
+            echo "."
+        else
+            echo " FAILED"
+        fi
+    }
+fi
+
+if ! type log_action_msg > /dev/null 2>&1; then
+    log_action_msg() {
+        echo "$@."
+    }
+fi
+
+# Check whether installation directory is correct
+if [ ! -d "$SESI" ]; then
+    echo "Error: Directory '$SESI' does not exist."
+    exit 1
+fi
+if [ ! -x "$SESINETD" ]; then
+    echo "Error: File '$SESINETD' does not exist or is not executable."
+    exit 1
+fi
+if [ ! -x "$SESINETD_START" ]; then
+    echo "Error: File '$SESINETD_START' does not exist or is not executable."
+    exit 1
+fi
+if [ ! -x "$SESICTRL" ]; then
+    echo "Error: File '$SESICTRL' does not exist or is not executable."
+    exit 1
+fi
+
+# Determine OPTIONS_FILE if empty
+if [ -z "$OPTIONS_FILE" ]; then
+    OPTIONS_FILE=${SESI}/sesinetd.options
+fi
+
+# Create user specified OPTIONS 
+OPTIONS=
+if [ -r "$OPTIONS_FILE" ]; then
+    OPTIONS="$OPTIONS "`cat $OPTIONS_FILE`
+fi
+OPTIONS="$OPTIONS $OPTIONS_EXTRA"
+if [ $DEBUG -eq 1 ]; then
+    OPTIONS="$OPTIONS --debug"
+fi
+
+# Determine LOG_FILE if empty
+if [ -z "$LOG_FILE" ]; then
+    LOG_FILE=/var/log/sesinetd.log
+fi
+
+# Determine PID_FILE
+if [ -z "$PID_DIR" ]; then
+    if [ -d /var/run ]; then
+	PID_DIR=/var/run
+    else
+	PID_DIR=$SESI
+    fi
+fi
+
+PID_FILE=${PID_DIR}/sesinetd.pid
+if [ $DEBUG -eq 1 ]; then
+    echo SESI=${SESI}
+    echo SESINETD=${SESINETD}
+    echo SESINETD_START=${SESINETD_START}
+    echo SESICTRL=${SESICTRL}
+    echo OPTIONS_FILE=${OPTIONS_FILE}
+    echo OPTIONS=${OPTIONS}
+    echo LOG_FILE=${LOG_FILE}
+    echo PID_DIR=${PID_DIR}
+    echo PID_FILE=${PID_FILE}
+fi
+
+start_sesinetd() {
+    $SESINETD_START --sesi=$SESI --sesinetd=$SESINETD --log-file=$LOG_FILE --pid-file=$PID_FILE $OPTIONS &
+    # Wait for 20 seconds to start
+    for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+        sleep 1
+        if [ -f $PID_FILE ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+stop_sesinetd() {
+    # Try for 20 seconds to stop
+    for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+        if [ -f $PID_FILE ]; then
+            rm -f $PID_FILE
+        fi
+        pid=`pidofsesinetd`
+        if [ -z "$pid" ]; then
+            return 0
+        fi
+        $SESICTRL -h 127.0.0.1 -Q
+        sleep 1
+    done
+    return 1
+}
+
+case "$1" in
+    start)
+        log_daemon_msg "Starting Houdini License server" "sesinetd"
+        if start_sesinetd; then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+        ;;
+
+    stop)
+        log_daemon_msg "Stopping Houdini License server" "sesinetd"
+        if stop_sesinetd; then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+        ;;
+
+    restart|force-reload)
+        log_daemon_msg "Stopping Houdini License server" "sesinetd"
+        if ! stop_sesinetd; then
+            log_end_msg 1
+            exit 0
+        else
+            log_end_msg 0
+        fi
+
+        log_daemon_msg "Starting Houdini License server" "sesinetd"
+        if start_sesinetd; then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+        ;;
+
+    *)
+        log_action_msg "Usage: /etc/init.d/sesinetd {start|stop|restart|force-reload}"
+        exit 1
+esac
+
+exit 0
