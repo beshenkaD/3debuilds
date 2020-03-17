@@ -18,13 +18,14 @@ inherit rpm desktop xdg-utils
 
 DEPEND="x11-libs/libGLw
 		media-libs/glu
+		>=dev-cpp/tbb-2019.8
 		app-admin/gamin
 		media-libs/audiofile
 		sys-fs/e2fsprogs
 		media-libs/libjpeg-turbo
 		media-libs/libpng-compat
 		media-libs/tiff
-		dev-libs/openssl
+		dev-libs/openssl-compat
 		app-shells/tcsh
 		media-fonts/font-adobe-100dpi
 		media-fonts/font-adobe-75dpi
@@ -51,16 +52,34 @@ src_prepare() {
 }
 
 src_install() {
-	for i in ${S}/maya-setup/*.rpm
+	for i in ${S}/maya-setup/Packages/*.rpm
 	do  
-		echo "moving ${i}"
-		mv ${i} $
+		echo "unpacking ${i}"
+		rpm_unpack ${i}
 	done
 
-	ln -s /usr/lib/libssl.so.1.0.0 "$pkgdir"/usr/autodesk/maya2017/lib/libssl.so.10
-	ln -s /usr/lib/libcrypto.so.1.0.0 "$pkgdir"/usr/autodesk/maya2017/lib/libcrypto.so.10
-	ln -s /usr/lib/libjpeg.so.62 "$pkgdir"/usr/autodesk/maya2017/lib/libjpeg.so.62
-	ln -s /usr/lib/libtiff.so "$pkgdir"/usr/autodesk/maya2017/lib/libtiff.so.3
+	for i in /opt /usr
+	do
+		echo "installing ${i}"
+		mv ${S}/${i} ${D}/
+	done
+
+	domenu ${FILESDIR}/maya.desktop
 }
 
+pkg_postinst() {
+	einfo "making symlinks"
+	ln -s /usr/lib64/libssl.so.1.0.0 /usr/autodesk/maya2020/lib/libssl.so.10
+	ln -s /usr/lib64/libcrypto.so.1.0.0 /usr/autodesk/maya2020/lib/libcrypto.so.10
+	ln -s /usr/lib64/libjpeg.so.62 /usr/autodesk/maya2020/lib/libjpeg.so.62
+	ln -s /usr/lib64/libtiff.so /usr/autodesk/maya2020/lib/libtiff.so.3
+	ln -s /usr/lib64/libXp.so.6 /usr/autodesk/maya2020/lib/libXp.so.6
 
+	xdg_desktop_database_update
+	xdg_icon_cache_update
+}
+
+pkg_postrm() {
+	einfo "please manually delete the unusable dirs such as:"
+	einfo "/usr/autodesk"
+}

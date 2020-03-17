@@ -1,13 +1,12 @@
-# Copyright 2020 Gentoo Authors
-# Distributed under the terms of the GNU General Public License v2
-
 EAPI=7
 
-DESCRIPTION="free game engine from epic games"
-HOMEPAGE="www.epicgames.com"
-SRC_URI="${RELEASE}.tar.gz"
+
+DESCRIPTION="A 3D game engine by Epic Games which can be used non-commercially for free."
+HOMEPAGE="https://www.unrealengine.com/"
 
 RELEASE="UnrealEngine-${PV}-release"
+SRC_URI="${RELEASE}.tar.gz"
+MY_PN="unreal-engine"
 
 LICENSE="UnrealEngine"
 SLOT="0"
@@ -15,24 +14,27 @@ KEYWORDS="amd64"
 IUSE=""
 
 DEPEND="sys-devel/clang
-		>=dev-lang/mono-6.4.0.198
-		app-text/dos2unix
-		dev-util/cmake
-		dev-vcs/git"
+	>=dev-lang/mono-5.20.1.19
+	app-text/dos2unix
+	dev-util/cmake
+	dev-vcs/git"
 RDEPEND="${DEPEND}
-		dev-libs/icu
-		media-libs/libsdl2
-		dev-lang/python
-		sys-devel/lld
-		x11-misc/xdg-user-dirs
-		x11-terms/xterm"
-PATCHES=("${FILESDIR}/use-system-mono.patch")
+	dev-libs/icu
+	media-libs/libsdl2
+	dev-lang/python
+	sys-devel/lld
+	x11-misc/xdg-user-dirs
+	x11-terms/xterm"
 
+#PATCHES=(
+#	"${FILESDIR}/use-system-mono.patch"
+#)
 
+S="${WORKDIR}/${RELEASE}"
 
 pkg_nofetch() {
-	einfo "Please download ${A} from https://github.com/EpicGames/UnrealEngine/releases"
-	einfo "The archive should then be placed into your DISTDIR directory"
+	einfo "Please download ${A} from https://github.com/EpicGames"
+	einfo "The archive should then be placed into your DISTDIR directory."
 }
 
 src_unpack() {
@@ -40,18 +42,14 @@ src_unpack() {
 }
 
 src_prepare() {
-
 	default
-	export TERM=xterm
 
-	echo "running setup"
+	export TERM=xterm
 	./Setup.sh
-	echo "generating project files"
 	./GenerateProjectFiles.sh -makefile
 }
 
 src_compile() {
-	cd ${P}
 
 	emake CrashReportClient-Linux-Shipping
 	emake CrashReportClientEditor-Linux-Shipping
@@ -62,19 +60,25 @@ src_compile() {
 	emake UnrealInsights
 
 }
-
 src_install() {
-	local dir =/opt/${PN}
+	dodir /opt/${PN}
+	local dir=/opt/${PN}
+	# Install .desktop file.
 	insinto /usr/share/applications/
-	doins ${FILESDIR}/UE4Editor.desktop
-#	insinto /usr/share/licenses/UnrealEngine
-#	doins LICENSE.md
-	insinto /usr/share/pixmaps
-	doins UE4Editor.png
+	doins ${FILESDIR}/${MY_PN}.desktop
+	# Install icon.
+	insinto /usr/share/pixmaps/ue4editor.png
+	doins ${S}/Engine/Source/Programs/UnrealVS/Resources/Preview.png
+	# Install license.
+	insinto /usr/share/licenses/UnrealEngine
+	doins LICENSE.md
+
+	# Install engine.
 	dodir ${dir}/Engine
-	dodir ${dir}/Engine/DerivedDataCache # editor needs this
-	dodir ${dir}/Engine/Intermediate # editor needs this, but not the contents
-	dodir ${dir}/Engine/Source # the source cannot be redistributed, but seems to be needed to compile c++ projects
+	dodir ${dir}/Engine/DerivedDataCache
+	dodir ${dir}/Engine/Intermediate
+	dodir ${dir}/Engine/Source
+
 	insinto ${dir}/Engine
 	doins -r Engine/Binaries
 	doins -r Engine/Build
@@ -86,14 +90,29 @@ src_install() {
 	doins -r Engine/Programs
 	doins -r Engine/Saved
 	doins -r Engine/Shaders
-	insinto ${dir}
 
+	# Install content
+	insinto ${dir}
 	doins -r FeaturePacks
 	doins -r Samples
 	doins -r Templates
-
-	doins GenerateProjectFiles.sh Setup.sh
-	doins .ue4dependencies
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
