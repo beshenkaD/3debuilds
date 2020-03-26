@@ -23,15 +23,15 @@ DEPEND="media-libs/fontconfig
 RDEPEND="${DEPEND}"
 BDEPEND=""
 S="${WORKDIR}"
-HDIRNAME="houdini-17.5.554-linux_x86_64_gcc6.3"
+HDIRNAME="houdini-${PV}-linux_x86_64_gcc6.3"
 
 pkgver_major="17"
 pkgver_minor="5"
-pkgver_build="554"
+pkgver_build="560"
 
 
 pkg_nofetch() {
-	einfo "please download ${P}-linux_x86_64_gcc6.3.tar.gz from https://www.sidefx.com/download/download-houdini/64349/"
+	einfo "please download ${PV}-linux_x86_64_gcc6.3.tar.gz from https://www.sidefx.com/download/download-houdini/64349/"
 	einfo "and put it into your DISTDIR directory"
 }
 
@@ -43,7 +43,7 @@ install_houdini_file() {
 	src="$1"
 	dest="$2"
 	sed -i '
-	s|${HFS}|/opt/hfs17.5.554|g
+	s|${HFS}|/opt/hfs17.5.560|g
 	s|${VER_MAJOR}|'${pkgver_major}'|g
 	s|${VER_MINOR}|'${pkgver_minor}'|g
 	s|${VER_BUILD}|'${pkgver_build}'|g
@@ -55,7 +55,7 @@ install_houdini_file() {
 src_install() {
 # Installing base files
 
-	dodir /opt/hfs17.5.554/python
+	dodir /opt/hfs${PV}/python
 	tar xzf ${S}/${HDIRNAME}/houdini.tar.gz -C ${D}/opt/hfs${PV}
 	tar xzf ${S}/${HDIRNAME}/pythonlibdeps.tar.gz -C ${D}/opt/hfs${PV}/python
 	tar xzf ${S}/${HDIRNAME}/python2.7.tar.gz -C ${D}/opt/hfs${PV}/python

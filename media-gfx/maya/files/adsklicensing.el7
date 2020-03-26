@@ -1,0 +1,8 @@
+#!/sbin/openrc-run
+
+command=/usr/bin/AdskLicensingService
+command_args="--run"
+pidfile=
+
+name="adsklicensing.el7"
+description="Autodesk Licensing Service"

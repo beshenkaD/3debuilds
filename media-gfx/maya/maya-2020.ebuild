@@ -25,6 +25,7 @@ DEPEND="x11-libs/libGLw
 		media-libs/libjpeg-turbo
 		media-libs/libpng-compat
 		media-libs/tiff
+		x11-libs/libxp
 		dev-libs/openssl-compat
 		app-shells/tcsh
 		media-fonts/font-adobe-100dpi
@@ -54,15 +55,20 @@ src_prepare() {
 src_install() {
 	for i in ${S}/maya-setup/Packages/*.rpm
 	do  
-		echo "unpacking ${i}"
+		einfo "unpacking ${i}"
 		rpm_unpack ${i}
 	done
 
-	for i in /opt /usr
+	for i in /opt /usr /var
 	do
-		echo "installing ${i}"
+		einfo "installing ${i}"
 		mv ${S}/${i} ${D}/
 	done
+
+	dobin ${D}/opt/Autodesk/AdskLicensing/9.2.1.2399/AdskLicensingService/AdskLicensingService
+	doinitd ${FILESDIR}/adsklicensing.el7
+
+
 
 	domenu ${FILESDIR}/maya.desktop
 }
@@ -72,8 +78,11 @@ pkg_postinst() {
 	ln -s /usr/lib64/libssl.so.1.0.0 /usr/autodesk/maya2020/lib/libssl.so.10
 	ln -s /usr/lib64/libcrypto.so.1.0.0 /usr/autodesk/maya2020/lib/libcrypto.so.10
 	ln -s /usr/lib64/libjpeg.so.62 /usr/autodesk/maya2020/lib/libjpeg.so.62
-	ln -s /usr/lib64/libtiff.so /usr/autodesk/maya2020/lib/libtiff.so.3
+	ln -s /usr/lib64/libtiff.so.5.5.0 /usr/autodesk/maya2020/lib/libtiff.so.3
 	ln -s /usr/lib64/libXp.so.6 /usr/autodesk/maya2020/lib/libXp.so.6
+	ln -s /usr/lib64/libtbb.so /usr/lib/libtbb_preview.so.2
+	einfo "registring maya"
+	/opt/Autodesk/AdskLicensing/9.2.1.2399/helper/AdskLicensingInstHelper register -pk 657L1 -pv 2020.0.0.F -el EN_US -cf /var/opt/Autodesk/Adlm/maya2020/MayaConfig.pit
 
 	xdg_desktop_database_update
 	xdg_icon_cache_update
