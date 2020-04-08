@@ -22,8 +22,7 @@ DEPEND="media-libs/fontconfig
 		sys-devel/gcc
 		media-libs/glu
 		x11-themes/hicolor-icon-theme
-		media-libs/tiff
-		app-arch/rpm"
+		media-libs/tiff"
 RDEPEND="${DEPEND}"
 BDEPEND=""
 

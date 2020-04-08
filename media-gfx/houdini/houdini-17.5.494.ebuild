@@ -7,8 +7,8 @@ inherit desktop xdg-utils
 
 DESCRIPTION="Powerful software to create films and games"
 HOMEPAGE="https://www.sidefx.com/"
-SRC_URI="${P}-linux_x86_64_gcc6.3.tar.gz"
-
+#SRC_URI="${P}-linux_x86_64_gcc6.3.tar.gz"
+SRC_URI="ftp://ftp.sidefx.com/public/Houdini17.5/Build.494/houdini-17.5.494-linux_x86_64_gcc6.3.tar.gz"
 
 LICENSE="custom"
 SLOT="0"
@@ -27,13 +27,13 @@ HDIRNAME="houdini-${PV}-linux_x86_64_gcc6.3"
 
 pkgver_major="17"
 pkgver_minor="5"
-pkgver_build="560"
+pkgver_build="494"
 
 
-pkg_nofetch() {
-	einfo "please download ${PV}-linux_x86_64_gcc6.3.tar.gz from https://www.sidefx.com/download/download-houdini/64349/"
-	einfo "and put it into your DISTDIR directory"
-}
+#pkg_nofetch() {
+#	einfo "please download ${PV}-linux_x86_64_gcc6.3.tar.gz from https://www.sidefx.com/download/download-houdini/64349/"
+#	einfo "and put it into your DISTDIR directory"
+#}
 
 src_unpack() {
 	unpack ${A}
@@ -43,7 +43,7 @@ install_houdini_file() {
 	src="$1"
 	dest="$2"
 	sed -i '
-	s|${HFS}|/opt/hfs17.5.560|g
+	s|${HFS}|/opt/hfs17.5.494|g
 	s|${VER_MAJOR}|'${pkgver_major}'|g
 	s|${VER_MINOR}|'${pkgver_minor}'|g
 	s|${VER_BUILD}|'${pkgver_build}'|g
@@ -73,13 +73,36 @@ src_install() {
 
 	install_houdini_file ${S}/${HDIRNAME}/desktop/sesi_houdini.menu
 
-# Installing something.... idk what is this ^_^
+# Installing mime
 	insinto usr/share/mime/packages/
 
 	for i in hip hiplc hipnc otl otllc otlnc hda hdalc hdanc pic piclc picnc geo bgeo orbolt
 	do
 		install_houdini_file ${S}/${HDIRNAME}/mime/application-x-${i}.xml
 	done
+
+# Installing hqueue
+	unpack ${S}/${HDIRNAME}/hqueue.tar.gz
+
+	insinto /opt/hqueue/scripts/${i}
+	insopts -m775
+
+	for i in hqserverd create_shared_drive.sh
+	do
+		doins ${S}/hqueue/scripts/${i}
+	done
+
+	sed -i -e 's|%%INSTALL_DIR%%|/opt/hqueue|' ${D}/opt/hqueue/scripts/hqserverd
+
+# Installing sesinetd
+	insinto /usr/lib/sesi
+	insopts -m775
+
+	for i in sesictrl sesinetd sesinetd.options sesinetd.startup sesinetd_safe sesiusage
+	do
+		doins ${D}/opt/hfs${PV}/houdini/sbin/${i}
+	done
+
 
 # Installing engines for maya and unity if needed
 
@@ -143,6 +166,8 @@ pkg_postinst() {
 # Useful for installing houdini engine for unreal
 	cd /opt/hfs${PV}
 	source houdini_setup
+	einfo "If you want to use houdini engine for unreal download it from this link:"
+	einfo "https://github.com/sideeffects/HoudiniEngineForUnreal/archive/b61f0594cc068a4bafd3ff47dfd65244738e7792.zip"
 }
 
 
