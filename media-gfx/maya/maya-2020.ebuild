@@ -11,7 +11,7 @@ SRC_URI="${MY_PN}_${PV}_ML_Linux_64bit.tgz"
 
 LICENSE="custom"
 SLOT="0"
-KEYWORDS="amd64"
+KEYWORDS="~amd64"
 IUSE=""
 
 inherit rpm desktop xdg-utils
@@ -54,7 +54,7 @@ src_prepare() {
 
 src_install() {
 	for i in ${S}/maya-setup/Packages/*.rpm
-	do  
+	do
 		einfo "unpacking ${i}"
 		rpm_unpack ${i}
 	done

@@ -1,0 +1,10 @@
+[Desktop Entry]
+
+Type=Application
+Version=23.2
+Name=Renderman Installer
+Comment=Install Renderman render engine
+Exec=/usr/bin/renderman-installer.sh
+Icon=renderman-icon.png
+Terminal=true
+Categories=Utility;Graphics

@@ -65,31 +65,44 @@ src_install() {
 		mv ${S}/${i} ${D}/
 	done
 
-#	dobin ${D}/opt/Autodesk/AdskLicensing/9.2.1.2399/AdskLicensingService/AdskLicensingService
-#	doinitd ${FILESDIR}/adsklicensing.el7
+# Adlmflexnet
+	chmod 777 ${D}/var/opt/Autodesk/Adlm/
+	chmod 777 ${D}/usr/local/share/macrovision/storage/FLEXnet/
+	touch ${D}var/flexlm/maya.lic
+
+
 
 	domenu ${FILESDIR}/maya.desktop
 }
 
 pkg_postinst() {
 	einfo "making symlinks"
-	ln -s /usr/lib64/libssl.so.1.0.0 /usr/autodesk/maya2020/lib/libssl.so.10
-	ln -s /usr/lib64/libcrypto.so.1.0.0 /usr/autodesk/maya2020/lib/libcrypto.so.10
-	ln -s /usr/lib64/libjpeg.so.62 /usr/autodesk/maya2020/lib/libjpeg.so.62
-	ln -s /usr/lib64/libtiff.so.5.5.0 /usr/autodesk/maya2020/lib/libtiff.so.3
-	ln -s /usr/lib64/libXp.so.6 /usr/autodesk/maya2020/lib/libXp.so.6
-	ln -s /usr/lib64/libtbb.so /usr/lib/libtbb_preview.so.2
-#	einfo "registring maya"
-#	/opt/Autodesk/AdskLicensing/9.2.1.2399/helper/AdskLicensingInstHelper register -pk 657L1 -pv 2020.0.0.F -el EN_US -cf /var/opt/Autodesk/Adlm/maya2020/MayaConfig.pit
+	ln -s /usr/lib64/libssl.so.1.0.0 /usr/lib64/libssl.so.10
+	ln -s /usr/lib64/libcrypto.so.1.0.0 /usr/autodesk/maya2019/lib/libcrypto.so.10
+	ln -s /usr/lib64/libjpeg.so.62 /usr/autodesk/maya2019/lib/libjpeg.so.62
+	ln -s /usr/lib64/libtiff.so.5.5.0 /usr/autodesk/maya2019/lib/libtiff.so.3
+	ln -s /usr/lib64/libXp.so.6 /usr/autodesk/maya2019/lib/libXp.so.6
+	ln -s /usr/lib64/libtbb.so /usr/lib64/libtbb_preview.so.2
+	ln -s /opt/Autodesk/Adlm/R14/lib64/libadlmPIT.so /usr/lib64/libadlmPIT.so
+	ln -s /opt/Autodesk/Adlm/R14/lib64/libadlmutil.so /usr/lib64/libadlmutil.so
 
 	xdg_desktop_database_update
 	xdg_icon_cache_update
+
+	einfo "To register your maya run: /usr/autodesk/maya2019/bin/adlmreg -i N 657K1 657K1 2019.0.0.F 123-12345678 /var/opt/Autodesk/Adlm/Maya2019/MayaConfig.pit as root."
+	einfo "but instead of 123-12345678 put your key"
+	einfo "if you have standalone license change N to S."
 }
 
 pkg_postrm() {
 #	einfo "please manually delete the unusable dirs such as:"
 #	einfo "/usr/autodesk"
 	rm -r /usr/autodesk
+	rm /usr/lib64/libadlmPIT.so
+	rm /usr/lib64/libadlmutil.so
+	rm /usr/lib64/libtbb_preview.so.2
+	rm /usr/lib64/libssl.so.10
+	rm -r /var/opt/Autodesk
 	einfo "symlinks deleted"
 }
 
