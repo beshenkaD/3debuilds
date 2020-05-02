@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="amd64"
 IUSE=""
 
-DEPEND=""
+DEPEND="dev-libs/openssl-compat"
 RDEPEND="${DEPEND}"
 BDEPEND=""
 
@@ -45,6 +45,12 @@ src_install() {
 pkg_postinst() {
 	ln -s /usr/lib64/libcrypto.so.1.0.0 /opt/pixar/RenderMan-Installer-ncr-23.2/lib/3rdparty/Qt-5.6.1/lib/libcrypto.so
 	ln -s /usr/lib64/libssl.so.1.0.0 /opt/pixar/RenderMan-Installer-ncr-23.2/lib/3rdparty/Qt-5.6.1/lib/libssl.so
+
+	einfo "For make it working in houdini add the following lines in your ~/houdini1*.*/houdini.env:"
+	einfo "RMANTREE="/opt/pixar/RenderManProServer-23.2/""
+	einfo "PATH="$PATH:$RMANTREE/bin""
+	einfo "For different 3d packages as maya or blender you can find instrutions here:"
+	einfo "https://renderman.pixar.com/forum/"
 }
 
 pkg_postrm() {
