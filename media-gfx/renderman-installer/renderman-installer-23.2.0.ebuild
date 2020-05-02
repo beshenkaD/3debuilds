@@ -41,3 +41,12 @@ src_install() {
 	domenu ${FILESDIR}/renderman-installer.desktop
 	dobin ${FILESDIR}/renderman-installer.sh
 }
+
+pkg_postinst() {
+	ln -s /usr/lib64/libcrypto.so.1.0.0 /opt/pixar/RenderMan-Installer-ncr-23.2/lib/3rdparty/Qt-5.6.1/lib/libcrypto.so
+	ln -s /usr/lib64/libssl.so.1.0.0 /opt/pixar/RenderMan-Installer-ncr-23.2/lib/3rdparty/Qt-5.6.1/lib/libssl.so
+}
+
+pkg_postrm() {
+	rm -r /opt/pixar
+}
