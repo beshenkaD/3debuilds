@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Foundry Mari
+GenericName=Mari
+Comment=3D modeling, animation, rendering and post-production
+Keywords=3d;cg;modeling;animation;painting;sculpting;texturing;rendering;render engine;python;
+Exec=/opt/foundry/Mari4.6v1/mari
+Icon=/opt/foundry/Mari4.6v1/Media/Icons/Mari.128x128.png
+Terminal=false
+Type=Application
+Categories=Graphics;3DGraphics;
