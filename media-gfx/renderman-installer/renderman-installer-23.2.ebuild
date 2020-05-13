@@ -7,14 +7,15 @@ inherit rpm desktop
 build="2046858"
 DESCRIPTION="renderman installer"
 HOMEPAGE="https://renderman.pixar.com/"
-SRC_URI="RenderMan-InstallerNCR-${PV}_${build}-linuxRHEL7_gcc63icc190.x86_64.rpm"
+SRC_URI="RenderMan-InstallerNCR-${PV}.0_${build}-linuxRHEL7_gcc63icc190.x86_64.rpm"
 
 LICENSE="custom"
 SLOT="0"
 KEYWORDS="amd64"
 IUSE=""
 
-DEPEND="dev-libs/openssl-compat"
+DEPEND="dev-libs/openssl-compat
+		app-arch/rpm"
 RDEPEND="${DEPEND}"
 BDEPEND=""
 
@@ -48,7 +49,9 @@ pkg_postinst() {
 
 	einfo "For make it working in houdini add the following lines in your ~/houdini1*.*/houdini.env:"
 	einfo "RMANTREE="/opt/pixar/RenderManProServer-23.2/""
-	einfo "PATH="$PATH:$RMANTREE/bin""
+	einfo "RFHTREE="/opt/pixar/RenderManForHoudini-23.2""
+	einfo 'PATH="$PATH:$RMANTREE/bin"'
+	einfo "and then copy (or make symlinks) files from /opt/pixar/RenderManForHoudini-23.2/1*.* to ~/houdini 1*.*"
 	einfo "For different 3d packages as maya or blender you can find instrutions here:"
 	einfo "https://renderman.pixar.com/forum/"
 }
